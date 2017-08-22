@@ -60,12 +60,50 @@ static const struct file_operations stats_debugfs_fops = {
 	.llseek  = seq_lseek,
 };
 
+static void addrs_chunk_show(struct gen_pool *pool,
+			     struct gen_pool_chunk *chunk, void *data)
+{
+	struct seq_file *seq = (struct seq_file *)data;
+
+	seq_printf(seq, "chunk: %pK\n", chunk);
+	seq_printf(seq, "  vaddr start: %lx\n", chunk->start_addr);
+	seq_printf(seq, "  vaddr end  : %lx\n", chunk->end_addr);
+	seq_printf(seq, "  phy_addr   : %pa\n", &chunk->phys_addr);
+}
+
+static int addrs_show(struct seq_file *seq, void *v)
+{
+	struct p2pmem_dev *p = seq->private;
+
+	if (p->pool)
+		gen_pool_for_each_chunk(p->pool, addrs_chunk_show,
+					(void *)seq);
+
+	return 0;
+}
+
+static int addrs_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, addrs_show, inode->i_private);
+}
+
+static const struct file_operations addrs_debugfs_fops = {
+	.owner   = THIS_MODULE,
+	.open    = addrs_open,
+	.release = single_release,
+	.read	 = seq_read,
+	.llseek  = seq_lseek,
+};
+
 static void setup_debugfs(struct p2pmem_dev *p)
 {
 	struct dentry *de;
 
 	de = debugfs_create_file("stats", 0400, p->debugfs_root,
 				 (void *)p, &stats_debugfs_fops);
+	de = debugfs_create_file("addrs", 0400, p->debugfs_root,
+				 (void *)p, &addrs_debugfs_fops);
+
 }
 
 static struct p2pmem_dev *to_p2pmem(struct device *dev)
