@@ -435,6 +435,8 @@ struct pci_dev {
 #endif
 #ifdef CONFIG_PCI_P2PDMA
 	struct pci_p2pdma *p2pdma;
+	unsigned int p2p_acs_requests;
+	u16 p2p_old_acs_flags;
 #endif
 	phys_addr_t rom; /* Physical address of ROM if it's not from the BAR */
 	size_t romlen; /* Length of ROM if it's not from the BAR */
