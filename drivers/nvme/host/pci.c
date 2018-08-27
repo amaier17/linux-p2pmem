@@ -1214,8 +1214,8 @@ static enum blk_eh_timer_return nvme_timeout(struct request *req, bool reserved)
 	 */
 	if (__nvme_poll(nvmeq, req->tag)) {
 		dev_warn(dev->ctrl.device,
-			 "I/O %d QID %d timeout, completion polled\n",
-			 req->tag, nvmeq->qid);
+			 "I/O %d LBA %llx QID %d timeout, completion polled\n",
+			 req->tag, iod->req.cmd->rw.slba, nvmeq->qid);
 		return BLK_EH_HANDLED;
 	}
 
@@ -1229,8 +1229,8 @@ static enum blk_eh_timer_return nvme_timeout(struct request *req, bool reserved)
 	case NVME_CTRL_CONNECTING:
 	case NVME_CTRL_RESETTING:
 		dev_warn(dev->ctrl.device,
-			 "I/O %d QID %d timeout, disable controller\n",
-			 req->tag, nvmeq->qid);
+			 "I/O %d LBA %llx QID %d timeout, disable controller\n",
+			 req->tag, iod->req.cmd->rw.slba, nvmeq->qid);
 		nvme_dev_disable(dev, false);
 		nvme_req(req)->flags |= NVME_REQ_CANCELLED;
 		return BLK_EH_HANDLED;
@@ -1245,8 +1245,8 @@ static enum blk_eh_timer_return nvme_timeout(struct request *req, bool reserved)
 	 */
 	if (!nvmeq->qid || iod->aborted) {
 		dev_warn(dev->ctrl.device,
-			 "I/O %d QID %d timeout, reset controller\n",
-			 req->tag, nvmeq->qid);
+			 "I/O %d LBA %llx QID %d timeout, reset controller\n",
+			 req->tag, iod->req.cmd->rw.slba, nvmeq->qid);
 		nvme_dev_disable(dev, false);
 		nvme_reset_ctrl(&dev->ctrl);
 
