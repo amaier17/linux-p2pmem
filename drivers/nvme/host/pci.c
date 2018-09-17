@@ -312,13 +312,7 @@ static bool nvme_dbbuf_update_and_check_event(u16 value, u32 *dbbuf_db,
 			return false;
 	}
     else
-    {
-        static int i=0;
-        if (i % 65536 == 0)
-        {
-            dev_warn(dev->ctrl.device, "I didn't run mb or wmb\n");
-            i++;
-        }
+        dev_warn(dev->ctrl.device, "I didn't run mb or wmb\n");
 
 	return true;
 }
