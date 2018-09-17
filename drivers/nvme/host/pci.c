@@ -306,9 +306,13 @@ static bool nvme_dbbuf_update_and_check_event(u16 value, u32 *dbbuf_db,
 		old_value = *dbbuf_db;
 		*dbbuf_db = value;
 
+        mb();
+
 		if (!nvme_dbbuf_need_event(*dbbuf_ei, value, old_value))
 			return false;
 	}
+    else
+        dev_warn(dev->ctrl.device, "I didn't run mb or wmb\n");
 
 	return true;
 }
